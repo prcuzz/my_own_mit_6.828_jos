@@ -19,7 +19,6 @@ pde_t *kern_pgdir;						// Kernel's initial page directory
 struct PageInfo *pages;					// Physical page state array
 static struct PageInfo *page_free_list; // Free list of physical pages
 
-
 // --------------------------------------------------------------
 // Detect machine's physical memory setup.
 // --------------------------------------------------------------
@@ -144,7 +143,7 @@ void mem_init(void)
 	i386_detect_memory();
 
 	// Remove this line when you're ready to test this function.
-	//panic("mem_init: This function is not finished\n");
+	// panic("mem_init: This function is not finished\n");
 
 	//////////////////////////////////////////////////////////////////////
 	// create initial page directory.
@@ -310,9 +309,9 @@ void page_init(void)
 	*/
 
 	page_free_list = NULL;
-	//pages[0].pp_ref = 0;
-	//pages[0].pp_link = NULL;
-	//page_free_list = &pages[0];
+	// pages[0].pp_ref = 0;
+	// pages[0].pp_link = NULL;
+	// page_free_list = &pages[0];
 	for (i = 1; i < PGNUM(IOPHYSMEM); i++)
 	{
 		pages[i].pp_ref = 0;
@@ -620,6 +619,39 @@ static uintptr_t user_mem_check_addr;
 int user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 {
 	// LAB 3: Your code here.
+	cprintf("user_mem_check va: %x, len: %x\n", va, len);
+
+	// (1)
+	if (((uintptr_t)va > ULIM))
+	{
+		user_mem_check_addr = (uintptr_t)va;
+		return -E_FAULT;
+	}
+
+	// (2)
+	uintptr_t start = (uintptr_t)ROUNDDOWN(va, PGSIZE);
+	uintptr_t end = (uintptr_t)ROUNDUP((va + len), PGSIZE);
+	pde_t *pte;
+	for (; start < end; start += PGSIZE)
+	{
+		pte = pgdir_walk(env->env_pgdir, (void *)start, 0);
+
+		if (!pte || !(*pte & PTE_P) || (*pte & (perm | PTE_P)) != (perm | PTE_P))
+		{
+			if (start <= (uintptr_t)va)
+			{
+				user_mem_check_addr = (uintptr_t)va;
+			}
+			else
+			{
+				user_mem_check_addr = start;
+			}
+
+			return -E_FAULT;
+		}
+	}
+
+	cprintf("user_mem_check success va: %x, len: %x\n", va, len);
 
 	return 0;
 }
