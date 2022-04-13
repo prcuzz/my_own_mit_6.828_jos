@@ -4,20 +4,20 @@
 #define ELF_MAGIC 0x464C457FU	/* "\x7FELF" in little endian */
 
 struct Elf {
-	uint32_t e_magic;	// must equal ELF_MAGIC
+	uint32_t e_magic;		// must equal ELF_MAGIC
 	uint8_t e_elf[12];
 	uint16_t e_type;
 	uint16_t e_machine;
 	uint32_t e_version;
-	uint32_t e_entry;
-	uint32_t e_phoff;
-	uint32_t e_shoff;
+	uint32_t e_entry;		// 程序入口地址
+	uint32_t e_phoff;		// Program Header Table的偏移
+	uint32_t e_shoff;		// Section Header Table的偏移
 	uint32_t e_flags;
-	uint16_t e_ehsize;
-	uint16_t e_phentsize;
-	uint16_t e_phnum;
-	uint16_t e_shentsize;
-	uint16_t e_shnum;
+	uint16_t e_ehsize;		// ELF Header结构大小
+	uint16_t e_phentsize;	// Program Header Table的大小
+	uint16_t e_phnum;		// Program Header Table的结构
+	uint16_t e_shentsize;	// Section Header Table的大小
+	uint16_t e_shnum;		// Section Header Table的结构
 	uint16_t e_shstrndx;
 };
 

@@ -65,18 +65,33 @@ _pgfault_upcall:
 	// ways as registers become unavailable as scratch space.
 	//
 	// LAB 4: Your code here.
+	// [zzc] change the stack 	trap-time esp				into	trap-time eip
+	//							trap-time eflags					trap-time esp
+	//							trap-time eip						trap-time eflags
+	//							general-purpose registers			general-purpose registers
+	
+	addl $8, %esp
+	movl 40(%esp), %eax 	//保存中断发生时的esp到eax
+	movl 32(%esp), %ecx 	//保存终端发生时的eip到ecx
+	movl %ecx, -4(%eax) 	//将中断发生时的esp值亚入到到原来的栈中
 
 	// Restore the trap-time registers.  After you do this, you
 	// can no longer modify any general-purpose registers.
 	// LAB 4: Your code here.
+	popal
+	addl $4, %esp
 
 	// Restore eflags from the stack.  After you do this, you can
 	// no longer use arithmetic operations or anything else that
 	// modifies eflags.
 	// LAB 4: Your code here.
+	popfl
 
 	// Switch back to the adjusted trap-time stack.
 	// LAB 4: Your code here.
+	popl %esp
 
 	// Return to re-execute the instruction that faulted.
 	// LAB 4: Your code here.
+	lea -4(%esp), %esp
+	ret
